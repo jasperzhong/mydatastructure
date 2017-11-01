@@ -194,6 +194,10 @@ namespace datastructure {
 
 	//显示链表
 	void SinglyLinkedList::Display()const {
+		if (this->L->shead == nullptr) {
+			cout << "链表为空!" << endl;
+			return;
+		}
 		SNode* pnode = this->L->shead->next;
 		while (pnode != nullptr) {
 			cout << pnode->element << " ";
@@ -214,30 +218,18 @@ namespace datastructure {
 
 	//逆置单链表，时间复杂度O(n)
 	void SinglyLinkedList::ReverseList() {
-		//新建一个辅助链表
-		SNode * temp_list = new SNode[1];
-		temp_list->next = nullptr;
-
-		//头插法，逆序,O(n)
-		SNode * p = this->L->shead->next, *temp;
-		while (p != nullptr) {
-			temp = new SNode[1];
-			temp->element = p->element;
-			temp->next = temp_list->next;
-			temp_list->next = temp;
-			p = p->next;
+		SNode* p, *q, *r;
+		p = this->L->shead->next;
+		q = p->next;
+		p->next = nullptr;
+		while (q != nullptr) {
+			r = q->next;
+			q->next = p;
+			p = q;
+			q = r;
 		}
-
-		//销毁原链表,O(n)
-		SNode * pnode = this->L->shead;
-		while (pnode != nullptr) {
-			pnode = pnode->next;
-			delete[] this->L->shead;
-			this->L->shead = pnode;
-		}
-
-		//指向新的链表
-		this->L->shead = temp_list;
+		this->L->shead->next = p;
+		
 	}
 
 	//删除多余元素
@@ -342,6 +334,10 @@ namespace datastructure {
 
 	//显示
 	void SinglyCircularLinkedList::Display()const {
+		if (this->L->shead == nullptr) {
+			cout << "链表为空!" << endl;
+			return;
+		}
 		SNode* pnode = this->L->shead->next;
 		while (pnode != this->L->shead) {
 			cout << pnode->element << " ";
@@ -448,6 +444,10 @@ namespace datastructure {
 
 	//显示
 	void DoublyCircularLinkedList::Display()const {
+		if (this->L->dhead == nullptr) {
+			cout << "链表为空!" << endl;
+			return;
+		}
 		SNode* pnode = this->L->shead->next;
 		while (pnode != this->L->shead) {
 			cout << pnode->element << " ";
@@ -456,7 +456,7 @@ namespace datastructure {
 		cout << endl;
 	}
 
-	//析构函数，单向循环链表的销毁
+	//析构函数，双向循环链表的销毁
 	DoublyCircularLinkedList::~DoublyCircularLinkedList() {
 		SNode * pnode = this->L->shead->next;
 		while (pnode != this->L->shead) {
