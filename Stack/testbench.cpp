@@ -1,10 +1,197 @@
-ï»¿#include "stack.h"
 #include <iostream>
+#include <cstring>
 #include <string>
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
+
+namespace datastructure {
+	//·µ»Ø×´Ì¬
+	enum Status {
+		OVER_FLOW = -2,
+		INFEASIBLE = -1,
+		ERROR = 0,
+		OK = 1
+	};
+
+	typedef char ElementType;
+
+	struct Node {
+		ElementType data;
+		Node* next;
+	};
+
+
+	//Ë³ĞòÕ»
+	class SequenceStack {
+	public:
+		SequenceStack();  //Ö»Ìá¹©Ä¬ÈÏ¹¹Ôì
+		Status Push(ElementType x);  //ÈëÕ»
+		Status Pop(ElementType& x);  //³öÕ»
+		ElementType Top()const;  //È¡Õ»¶¥ÔªËØ
+		bool Empty()const;  //ÊÇ·ñÎª¿Õ
+		int Size()const;  //¹²ÓĞ¶àÉÙ¸öÔªËØ
+		~SequenceStack();
+	private:
+		enum {
+			STACK_INIT_SIZE = 100,
+			STACKINCREMENT = 10,
+		};
+		ElementType* top_;
+		ElementType* base_;
+		int stack_size_;  //×î´óÈİÁ¿
+	};
+
+	typedef int ElementType2;
+	struct Node2 {
+		ElementType2 data;
+		Node2* next;
+	};
+	//Á´Õ»
+	class LinkedStack {
+	public:
+		LinkedStack();  //Ö»Ìá¹©Ä¬ÈÏ¹¹Ôì
+		Status Push(ElementType2 x);  //ÈëÕ»
+		Status Pop(ElementType2& x);  //³öÕ»
+		ElementType2 Top()const;  //È¡Õ»¶¥ÔªËØ
+		bool Empty()const;  //ÊÇ·ñÎª¿Õ
+		int Size()const;  //¹²ÓĞ¶àÉÙ¸öÔªËØ
+		~LinkedStack();
+	private:
+		Node2* top_; //Õ»¶¥£¬ÒàÎª±íÍ·
+	};
+}
+
+
+namespace datastructure {
+
+	//C++°ærealloc
+	template<typename T>
+	T* Realloc(T* oldptr, int oldsize, int newsize) {
+		//ÖØĞÂÉêÇëÄÚ´æ
+		T* newptr = new T[newsize];
+		//ÄÚ´æÒÆ¶¯
+		memmove(newptr, oldptr, oldsize * sizeof(T));
+		//ÊÍ·ÅÔ­ÄÚ´æ
+		delete[]oldptr;
+		return newptr;
+	}
+
+	//Ä¬ÈÏ¹¹Ôì
+	SequenceStack::SequenceStack() {
+		this->base_ = new ElementType[STACK_INIT_SIZE];
+		this->top_ = this->base_;
+		this->stack_size_ = STACK_INIT_SIZE;
+	}
+
+	//¹²ÓĞ¶àÉÙ¸öÔªËØ
+	int SequenceStack::Size()const {
+		return this->top_ - this->base_;
+	}
+
+	//ÊÇ·ñÎª¿Õ
+	bool SequenceStack::Empty()const {
+		return this->top_ == this->base_;
+	}
+
+	//ÈëÕ»
+	Status SequenceStack::Push(ElementType x) {
+		if (Size() >= this->stack_size_) {
+			this->base_ = Realloc(this->base_, this->stack_size_, this->stack_size_ + STACKINCREMENT);
+			this->top_ = this->base_ + this->stack_size_;
+			this->stack_size_ += STACKINCREMENT;
+			if (this->base_ == nullptr)
+				return OVER_FLOW;
+		}
+		*this->top_ = x;
+		++this->top_;
+		return OK;
+	}
+
+	//³öÕ»
+	Status SequenceStack::Pop(ElementType& x) {
+		if (Empty()) {
+			return ERROR;
+		}
+		x = *(this->top_-1);
+		--this->top_;
+		return OK;
+	}
+
+	//È¡Õ»¶¥ÔªËØ
+	ElementType SequenceStack::Top()const {
+		return *(this->top_ - 1);	
+	}
+
+	SequenceStack::~SequenceStack() {
+		delete[]this->base_;
+	}
+
+	//<------------------------------------->
+	
+	//Ä¬ÈÏ¹¹Ôì
+	LinkedStack::LinkedStack() {
+		this->top_ = new Node2[1];
+		this->top_->next = nullptr;
+	}
+
+	//ÊÇ·ñÎª¿Õ
+	bool LinkedStack::Empty()const {
+		return this->top_->next == nullptr;
+	}
+
+	//¹²ÓĞ¶àÉÙ¸öÔªËØ
+	int LinkedStack::Size()const {
+		int cnt = 0;
+		Node2* p = this->top_->next;
+		while (p) {
+			++cnt;
+			p = p->next;
+		}
+		return cnt;
+	}
+
+	//ÈëÕ»
+	Status LinkedStack::Push(ElementType2 x) {
+		Node2* temp;
+		temp = new Node2[1];
+		temp->data = x;
+		temp->next = this->top_->next;
+		this->top_->next = temp;
+		return OK;
+	}
+
+	//³öÕ»
+	Status LinkedStack::Pop(ElementType2& x) {
+		if (Empty()) {
+			return ERROR;
+		}
+		Node2* temp = this->top_->next->next;
+		x = this->top_->next->data;
+		delete[]this->top_->next;
+		this->top_->next = temp;
+		return OK;
+	}
+
+	//È¡Õ»¶¥ÔªËØ
+	ElementType2 LinkedStack::Top()const {
+		return this->top_->next->data;
+	}
+
+	LinkedStack::~LinkedStack() {
+		Node2* p = this->top_->next;
+		while (p) {
+			p = this->top_->next;
+			delete[]this->top_;
+			this->top_= p;
+		}
+	}
+}
+
+
+
+
 using datastructure::LinkedStack;
 using datastructure::SequenceStack;
 using datastructure::Status;
@@ -12,7 +199,7 @@ using datastructure::Node;
 
 const char* OPTR = "+-*/()=";
 
-//æ‹¬å¼§åŒ¹é…
+//À¨»¡Æ¥Åä
 void BracketsMatching() {
 	SequenceStack s;
 	string file;
@@ -27,7 +214,7 @@ void BracketsMatching() {
 			else if (file[i] == '}' || file[i] == ']' || file[i] == ')') {
 				if (s.Empty()) {
 					cout << "no\n";
-					cout << file[i] << "æœŸå¾…å·¦æ‹¬å·\n";
+					cout << file[i] << "ÆÚ´ı×óÀ¨ºÅ\n";
 					return;
 				}
 				s.Pop(c);
@@ -36,7 +223,7 @@ void BracketsMatching() {
 						continue;
 					else {
 						cout << "no\n";
-						cout << "{æœŸå¾…å³æ‹¬å·\n";
+						cout << "{ÆÚ´ıÓÒÀ¨ºÅ\n";
 						return;
 					}
 				}
@@ -45,7 +232,7 @@ void BracketsMatching() {
 						continue;
 					else {
 						cout << "no\n";
-						cout << "[æœŸå¾…å³æ‹¬å·\n";
+						cout << "[ÆÚ´ıÓÒÀ¨ºÅ\n";
 						return;
 					}
 				}
@@ -54,7 +241,7 @@ void BracketsMatching() {
 						continue;
 					else {
 						cout << "no\n";
-						cout << "(æœŸå¾…å³æ‹¬å·\n";
+						cout << "(ÆÚ´ıÓÒÀ¨ºÅ\n";
 						return;
 					}
 				}
@@ -64,14 +251,14 @@ void BracketsMatching() {
 	}
 	if (!s.Empty()) {
 		cout << "no\n";
-		cout << s.Top() << "æœŸå¾…å³æ‹¬å·\n";
+		cout << s.Top() << "ÆÚ´ıÓÒÀ¨ºÅ\n";
 		return;
 	}
 
 	cout << "yes\n";
 }
 
-//åˆ¤æ–­è¿ç®—ç¬¦ä¼˜å…ˆçº§çš„
+
 bool isHigh(char top, char op) {
 	if ((top == '+') && (op == '+')) return true;
 	if ((top == '+') && (op == '+')) return true;
@@ -89,7 +276,7 @@ bool isHigh(char top, char op) {
 	return false;
 }
 
-//ä¸­ç¼€è¡¨è¾¾å¼æ±‚å€¼(ç®—ç¬¦ä¼˜å…ˆæ³•)
+//ÖĞ×º±í´ïÊ½ÇóÖµ(Ëã·ûÓÅÏÈ·¨)
 void InfixEval() {
 	char input;
 	char x;
@@ -98,8 +285,8 @@ void InfixEval() {
 	int cnt = 0;
 	int pow = 1;
 	int a, b, c;
-	SequenceStack optr; //æ“ä½œç¬¦
-	LinkedStack opnd;  //æ“ä½œæ•°
+	SequenceStack optr; //²Ù×÷·û
+	LinkedStack opnd;  //²Ù×÷Êı
 	while (cin >> input) {
 		if (input >= '0' && input <= '9') {
 			arr[cnt++] = static_cast<int>(input - '0');
@@ -120,7 +307,7 @@ void InfixEval() {
 				opnd.Push(static_cast<int>(num));
 			}
 			
-			//ç»“æŸæ—¶ï¼Œé€€æ ˆåˆ°å…¨ç©º
+			
 			if (input == '=') {
 				while (!optr.Empty()) {
 					optr.Pop(x);
@@ -180,13 +367,13 @@ void InfixEval() {
 				return;
 			}
 
-			//æ“ä½œç¬¦æ ˆä¸ºç©ºç›´æ¥æ’å…¥
+			//²Ù×÷·ûÕ»Îª¿ÕÖ±½Ó²åÈë
 			if (optr.Empty()) {
 				optr.Push(input);
 				continue;
 			}
 			
-			//è‹¥æ ˆé¡¶çš„æ“ä½œç¬¦ä¼˜å…ˆçº§é«˜äºè¾“å…¥çš„ï¼Œé‚£ä¹ˆå…ˆå¼¹å‡ºæ ˆé¡¶ï¼Œè¿›è¡Œè¿ç®—ï¼Œå†å°†è¿ç®—ç»“æœå­˜æ”¾åˆ°æ“ä½œæ•°æ ˆï¼Œå†pushè¿™ä¸ªæ“ä½œç¬¦
+			//ÈôÕ»¶¥µÄ²Ù×÷·ûÓÅÏÈ¼¶¸ßÓÚÊäÈëµÄ£¬ÄÇÃ´ÏÈµ¯³öÕ»¶¥£¬½øĞĞÔËËã£¬ÔÙ½«ÔËËã½á¹û´æ·Åµ½²Ù×÷ÊıÕ»£¬ÔÙpushÕâ¸ö²Ù×÷·û
 			if (isHigh(optr.Top(), input)) {
 				optr.Pop(x);
 				optr.Push(input);
@@ -244,7 +431,7 @@ void InfixEval() {
 
 			}
 			else {
-				//å°±å¿…é¡»ç®—åˆ°â€˜ï¼ˆâ€™
+				//¾Í±ØĞëËãµ½¡®£¨¡¯
 				if (input == ')') {
 					while (optr.Top() != '(') {
 						optr.Pop(x);
@@ -308,21 +495,135 @@ void InfixEval() {
 	}
 }
 
-//ä¸­ç¼€è¡¨è¾¾å¼è½¬åç¼€è¡¨è¾¾å¼
+//ÖĞ×º±í´ïÊ½×ªºó×º±í´ïÊ½
 void Infix2Postfix() {
+	char input;
+	char x;
+	int num;
+	int arr[10];
+	int cnt = 0;
+	int pow = 1;
+	int a, b, c;
+	SequenceStack optr; //²Ù×÷·û
+	LinkedStack opnd;  //²Ù×÷Êı
+	while (cin >> input) {
+		if (input >= '0' && input <= '9') {
+			arr[cnt++] = static_cast<int>(input - '0');
+		}
+		else {
 
+			num = 0;
+			pow = 1;
+			for (int i = cnt-1; i >=0; --i) {
+				num += arr[i] * pow;
+				pow *= 10;
+			}
+			if (cnt) {
+				cnt = 0;
+				cout << static_cast<int>(num) << " ";
+			}
+			
+			if(input == '=')
+				break;
+				
+			if(optr.Empty()){
+				optr.Push(input);
+				continue;
+			}
+			if(input == ')'){
+				while(!optr.Empty()){
+					optr.Pop(x);
+					if(x == '(')
+						break;
+					cout << x << " ";
+				}	
+				continue;
+			}
+			
+			while(isHigh(optr.Top(), input) && !optr.Empty()){
+				optr.Pop(x);
+				cout << x << " ";		
+			}
+			optr.Push(input);
+		}
+		
+	}
+	
+	while(!optr.Empty()){
+		optr.Pop(x);
+		cout << x << " ";
+	}
 }
 
-//åç¼€è¡¨è¾¾å¼æ±‚å€¼
+//ºó×º±í´ïÊ½ÇóÖµ
 void PostfixEval() {
-
+	char input;
+	char x;
+	int num;
+	int arr[10];
+	int cnt = 0;
+	int pow = 1;
+	int a, b, c;
+	SequenceStack optr; //²Ù×÷·û
+	LinkedStack opnd;  //²Ù×÷Êı
+	
+	while ((input = cin.get()) != '=') {
+		if (input >= '0' && input <= '9') {
+			arr[cnt++] = static_cast<int>(input - '0');
+		}
+		else {
+			if (!(strchr(OPTR,input) || input == ' ')){
+				cout << "ERROR\n";
+				return;
+			}
+			num = 0;
+			pow = 1;
+			for (int i = cnt-1; i >=0; --i) {
+				num += arr[i] * pow;
+				pow *= 10;
+			}
+			if (cnt) {
+				cnt = 0;
+				opnd.Push(static_cast<int>(num));
+			}
+			
+			if(input == ' ')
+				continue;
+						
+			
+			if(input == '+'){
+				opnd.Pop(a);
+				opnd.Pop(b);
+				opnd.Push(b+a);
+			} 
+			else if(input == '-'){
+				opnd.Pop(a);
+				opnd.Pop(b);
+				opnd.Push(b-a);
+			}
+			else if(input == '*'){
+				opnd.Pop(a);
+				opnd.Pop(b);
+				opnd.Push(b*a);
+			}
+			else if(input == '/'){
+				opnd.Pop(a);
+				opnd.Pop(b);
+				opnd.Push(b/a);
+			}
+			
+		}
+	}	
+	if(input == '='){
+		cout << opnd.Top() << endl;
+		return;
+	}
 }
 
 int main()
 {
 
-	InfixEval();
+	PostfixEval();
 
-	system("pause");
 	return 0;
 }
