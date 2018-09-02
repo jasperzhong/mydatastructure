@@ -19,6 +19,14 @@ int main()
 	rbtree->Insert(14);
 	rbtree->Insert(15);
 
+
+	rbtree->Print();
+	rbtree->Delete(5);
+
+	cout << endl;
+	cout << endl;
+	cout << endl;
+	cout << endl;
 	rbtree->Print();
 	delete rbtree;
 

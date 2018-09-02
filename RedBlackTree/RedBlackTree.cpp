@@ -5,7 +5,7 @@ using std::endl;
 
 namespace datastructure {
 	// default constructor
-	RedBlackTree::RedBlackTree() 
+	RedBlackTree::RedBlackTree()
 		: nil_(new Node[1]) {
 		this->root_ = this->nil_;
 
@@ -50,7 +50,7 @@ namespace datastructure {
 		Node* z = new Node[1];
 		z->key = key;
 		z->parent = y;
-		
+
 		// empty
 		if (y == this->nil_)
 			this->root_ = z;
@@ -170,9 +170,143 @@ namespace datastructure {
 			_Display(p->right, n + 1);
 			for (int i = 0; i < 10 * n; ++i)
 				cout << " ";
-			cout << p->key << "|" <<  p->color << endl << endl;
+			cout << p->key << "|" << p->color << endl << endl;
 			_Display(p->left, n + 1);
 		}
+	}
+
+	// search a node  
+	Node* RedBlackTree::Search(const Type& key) const {
+		Node* p = this->root_;
+
+		while (p != this->nil_) {
+			if (key < p->key)
+				p = p->left;
+			else if (key > p->key)
+				p = p->right;
+			else 
+				break;
+		}
+
+		return p;
+	}
+
+
+	void RedBlackTree::Delete(const Type& key) {
+		Node* z = this->Search(key);
+		if (z == this->nil_)
+			return;
+		Node* y = z, *x;
+		Color y_original_color = y->color;
+		if (z->left == this->nil_) {
+			x = z->right;
+			this->_Transplant(z, z->right);
+		}
+		else if (z->right == this->nil_) {
+			x = z->left;
+			this->_Transplant(z, z->left);
+		}
+		else {
+			y = this->Minimum(z->right);
+			y_original_color = y->color;
+			x = y->right;
+			if (y->parent == z) {
+				x->parent = y;
+			}
+			else {
+				this->_Transplant(y, y->right);
+				y->right = z->right;
+				y->right->parent = y;
+			}
+			this->_Transplant(z, y);
+			y->left = z->left;
+			y->left->parent = y;
+			y->color = z->color;
+		}
+		if (y_original_color == BLACK)
+			this->_DeleteFixup(x);
+	}
+
+
+	Node* RedBlackTree::Minimum(Node* z) const {
+		Node* p = z;
+		if (p == this->nil_) {
+			return this->nil_;
+		}
+		else {
+			while (p->left != this->nil_)
+				p = p->left;
+			return p;
+		}
+	}
+
+	void RedBlackTree::_Transplant(Node* u, Node* v) {
+		if (u->parent == this->nil_)
+			this->root_ = v;
+		else if (u == u->parent->left)
+			u->parent->left = v;
+		else
+			u->parent->right = v;
+		v->parent = u->parent;
+	}
+
+	void RedBlackTree::_DeleteFixup(Node* x) {
+		Node* w;
+		while (x != this->root_ && x->color == BLACK) {
+			if (x == x->parent->left) {
+				w = x->parent->right;
+				if (w->color == RED) {
+					w->color = BLACK;
+					x->parent->color = RED;
+					this->_LeftRotate(x->parent);
+					w = x->parent->right;
+				}
+				if (w->left->color == BLACK && w->right->color == BLACK) {
+					w->color = RED;
+					x = x->parent;
+				}
+				else if (w->right->color == BLACK) {
+					w->left->color = BLACK;
+					w->color = RED;
+					this->_RightRotate(w);
+					w = x->parent->right;
+				}
+				else {
+					w->color = x->parent->color;
+					x->parent->color = BLACK;
+					w->right->color = BLACK;
+					this->_LeftRotate(x->parent);
+					x = this->root_;
+				}
+			}
+			else {
+				w = x->parent->left;
+				if (w->color == RED) {
+					w->color = BLACK;
+					x->parent->color = RED;
+					this->_RightRotate(x->parent);
+					w = x->parent->left;
+				}
+				if (w->right->color == BLACK && w->left->color == BLACK) {
+					w->color = RED;
+					x = x->parent;
+				}
+				else if (w->left->color == BLACK) {
+					w->right->color = BLACK;
+					w->color = RED;
+					this->_LeftRotate(w);
+					w = x->parent->left;
+				}
+				else {
+					w->color = x->parent->color;
+					x->parent->color = BLACK;
+					w->left->color = BLACK;
+					this->_RightRotate(x->parent);
+					x = this->root_;
+				}
+			}
+		}
+		x->color = BLACK;
 	}
 }
 

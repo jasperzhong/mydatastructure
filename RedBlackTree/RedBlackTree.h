@@ -39,6 +39,7 @@ namespace datastructure {
 			// it should print an increasing sequence
 			void Print() const;
 
+			Node* Minimum(Node* z) const;
 		private:
 			// tree root
 			Node* root_;
@@ -56,6 +57,10 @@ namespace datastructure {
 			void _Destroy(Node* p);
 
 			void _Display(Node* p, int n)const;
+
+			void _Transplant(Node* u, Node* v);
+
+			void _DeleteFixup(Node* x);
 	};
 
 }
